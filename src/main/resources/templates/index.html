@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"  
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4"    
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">    
 <head>
 <meta charset="UTF-8" />
 <title>首页</title>
@@ -7,11 +9,26 @@
 </head>
 <body>
 Hello, <shiro:principal/>, how are you today?
-
-    <shiro:hasRole name="admin">
     
-        <br />I'm fine, 我拥有管理员角色--<span th:text="${username}"></span>
+    
+    <!-- 当数据库中的权限和这个一致时就可以进入 -->
+    <shiro:hasRole name="admin">
+         <br />I'm fine, 我拥有管理员角色--<span th:text="${username}"></span>
     </shiro:hasRole>
+        
+ <!--        数据库中对应的Entity的数据，是放入shiro框架中的SimpleAuthenticationInfo中的对象，所以才会有这些 -->
+		<shiro:user>    
+		               欢迎<shiro:principal property="userName"/>
+		         欢迎<shiro:principal property="id"/>
+		     欢迎<shiro:principal property="password"/>   
+		          欢迎<shiro:principal property="roles"/> 
+		               欢迎<shiro:principal property="descriptions"/> 
+		               
+		</shiro:user>   
+		
+		<form action="/logOut" method="Post">
+		      <input type="submit" value="点我注销"></input>
+		</form>
     
 </body>
 </html>

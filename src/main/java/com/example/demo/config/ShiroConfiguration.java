@@ -47,6 +47,7 @@ public class ShiroConfiguration {
         shiroFilterFactoryBean.setSecurityManager(securityManager);
         
         //要求登录时的链接(可根据项目的URL进行替换),非必须的属性,默认会自动寻找Web工程根目录下的"/login.jsp"页面
+        //设置了表明是使用thymeleaf？这里需要认证的会自动跳到login.html里面去
         shiroFilterFactoryBean.setLoginUrl("/login");
 
         //登录成功后要跳转的连接,逻辑也可以自定义，例如返回上次请求的页面
@@ -69,13 +70,12 @@ public class ShiroConfiguration {
 
         // <!-- 过滤链定义，从上向下顺序执行，一般将 /**放在最为下边 -->:这是一个坑呢，一不小心代码就不好使了;
         // <!-- authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问-->
+        //所有需要认证的资源都会跳到login的链接上去。
         filterChainDefinitionMap.put("/webui/**", "anon");
         filterChainDefinitionMap.put("/webjars/**", "anon");
-        filterChainDefinitionMap.put("/login", "authc");
-        filterChainDefinitionMap.put("/**", "authc");
-
+        filterChainDefinitionMap.put("/login", "authc");//如果不是认证的话将不会用到shiro框架的管理器，将直接进入
+        filterChainDefinitionMap.put("/**", "authc");//authc
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
-
         return shiroFilterFactoryBean;
     }
 
@@ -114,26 +114,25 @@ public class ShiroConfiguration {
      * 可以扩展凭证匹配器，实现 输入密码错误次数后锁定等功能，下一次
      * @return
      */
-    @Bean(name="credentialsMatcher")
-    public HashedCredentialsMatcher hashedCredentialsMatcher(){
-       HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
-
-       hashedCredentialsMatcher.setHashAlgorithmName("md5");//散列算法:这里使用MD5算法;
-       hashedCredentialsMatcher.setHashIterations(2);//散列的次数，比如散列两次，相当于 md5(md5(""));
-       //storedCredentialsHexEncoded默认是true，此时用的是密码加密用的是Hex编码；false时用Base64编码
-       hashedCredentialsMatcher.setStoredCredentialsHexEncoded(true);
-
-       return hashedCredentialsMatcher;
-    }
+//    @Bean(name="credentialsMatcher")
+//    public HashedCredentialsMatcher hashedCredentialsMatcher(){
+//       HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
+//
+//       hashedCredentialsMatcher.setHashAlgorithmName("md5");//散列算法:这里使用MD5算法;
+//       hashedCredentialsMatcher.setHashIterations(2);//散列的次数，比如散列两次，相当于 md5(md5(""));
+//       //storedCredentialsHexEncoded默认是true，此时用的是密码加密用的是Hex编码；false时用Base64编码
+//       hashedCredentialsMatcher.setStoredCredentialsHexEncoded(true);
+//       return hashedCredentialsMatcher;
+//    }
 
     /**
      * Shiro生命周期处理器
      * @return
      */
-    @Bean
-    public LifecycleBeanPostProcessor lifecycleBeanPostProcessor(){
-        return new LifecycleBeanPostProcessor();
-    }
+//    @Bean
+//    public LifecycleBeanPostProcessor lifecycleBeanPostProcessor(){
+//        return new LifecycleBeanPostProcessor();
+//    }
     
     /**
      * 开启Shiro的注解(如@RequiresRoles,@RequiresPermissions),需借助SpringAOP扫描使用Shiro注解的类,并在必要时进行安全逻辑验证
@@ -162,6 +161,8 @@ public class ShiroConfiguration {
     public ShiroDialect shiroDialect(){
         return new ShiroDialect();
     }
+    
+    
     
 }
 

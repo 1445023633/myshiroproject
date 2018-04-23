@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AccountException;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -18,6 +19,7 @@ import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
+import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
@@ -51,43 +53,46 @@ public class UserRealm extends AuthorizingRealm{
 //		super.setCredentialsMatcher(authCredential);
 //	}
 	
-//	(用于获取认证成功后的角色、权限等信息
+//	(用于添加认证成功后的角色、权限等信息 ，并没有什么用。
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principal) {
 		//获取session中的用户
-		User user=(User) principal.fromRealm(this.getClass().getName()).iterator().next();//获取session中的用户
+//		User user=(User) principal.fromRealm(this.getClass().getName()).iterator().next();//获取session中的用户
 		//角色集合
-		List<String> userRoles = new ArrayList<String>(); 
-		//权限集合
-	    List<String> userPermissions = new ArrayList<String>();  
-	    //从数据库中获取当前登录用户的详细信息  
-//        User user = userRepository.findByUserName(currentLoginName);
-        if(null != user){  
-            //获取当前用户下拥有的所有角色列表
-        	if(user.getUserName().contains(",")) {
-        		String[]  roles=user.getRoles().split(",");
-        		userRoles.addAll(Arrays.asList(roles));
-        	}else {
-        		userRoles.add(user.getRoles());
-        	}
-        	//获取当前所有权限集合
-        	for(String role:userRoles) {
-        		//获取角色对应
-            	userPermissions.add(permessionRepository.findByRole(role).getPermissions());
-        	}
-        }else{  
-            throw new AuthorizationException("找不到该用户名对应的用户");  
-        }  
+//		List<String> userRoles = new ArrayList<String>(); 
+//		//权限集合
+//	    List<String> userPermissions = new ArrayList<String>();  
+//	    //从数据库中获取当前登录用户的详细信息  
+////        User user = userRepository.findByUserName(currentLoginName);
+//        if(null != user){  
+//            //获取当前用户下拥有的所有角色列表
+//        	if(user.getUserName().contains(",")) {
+//        		String[]  roles=user.getRoles().split(",");
+//        		userRoles.addAll(Arrays.asList(roles));
+//        	}else {
+//        		userRoles.add(user.getRoles());
+//        	}
+//        	//获取当前所有权限集合
+//        	for(String role:userRoles) {
+//        		//获取角色对应
+//            	userPermissions.add(permessionRepository.findByRole(role).getPermissions());
+//        	}
+//        }else{  
+//            throw new AuthorizationException("找不到该用户名对应的用户");  
+//        }  
         //为当前用户的角色和权限放入认证管理中
-        SimpleAuthorizationInfo authorizationInfo=new SimpleAuthorizationInfo();
-        authorizationInfo.addRoles(userRoles);
-        authorizationInfo.addStringPermissions(userPermissions);
-		return authorizationInfo;
+//        SimpleAuthorizationInfo authorizationInfo=new SimpleAuthorizationInfo();
+//        authorizationInfo.addRoles(userRoles);
+//        authorizationInfo.addStringPermissions(userPermissions);
+//		SimpleAuthorizationInfo authorizationInfo=new SimpleAuthorizationInfo();
+		return  null;
 	}
 	
 	 /** 
      * 验证当前登录的Subject
-     * LoginController.login()方法中执行Subject.login()时 执行此方法 
+     * LoginController.login()方法中执行Subject.login()时 执行此方法 ，生成了SimpleAuthenticationInfo对象后,
+     * 然后进去令牌方法中进行判断,因为是与数据库中的密码进行匹配，所以要将获取到的user对象变成shiro框架中的SimpleAuthenticationInfo对象，
+     * 所有的操作都是在shiro框架中进行，所以需要建立一些对象放入 shiro框架中。
      */
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authcToken) throws AuthenticationException {
@@ -100,9 +105,14 @@ public class UserRealm extends AuthorizingRealm{
 //        Map<String, Object> map = new HashMap<String, Object>();
 //        map.put("nickname", username); 
         User user = userRepository.findByUserName(username);
-        if(user == null) {
-            throw new UnknownAccountException();//没找到帐号
+        if(user==null) {
+        	//没找到帐号
+            throw new AccountException("没找到帐号11111111111");
         } 
+//        ByteSource salt = ByteSource.Util.bytes(user.getSalt());
+        //核心，将会把这个对象放到shiro框架中去，包括authcToken,
+        //自己理解SimpleAuthenticationInfo是AuthenticationInfo的子类，UsernamePasswordToken是AuthenticationToken的子类 
         return new SimpleAuthenticationInfo(user, user.getPassword(),this.getClass().getName());//放入shiro.调用
 	}
+	
 }
