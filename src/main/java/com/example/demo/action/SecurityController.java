@@ -69,7 +69,16 @@ public class SecurityController {
             logger.info("对用户[" + username + "]进行登录验证..验证开始");  
             //将进入到shiro框架中调用安全管理器进行相应的操作
             currentUser.login(token);  
-            logger.info("对用户[" + username + "]进行登录验证..验证通过");  
+            //验证是否登录成功  
+            if(currentUser.isAuthenticated()){  
+                logger.info("用户[" + username + "]登录认证通过(这里可以进行一些认证通过后的一些系统参数初始化操作)");  
+                //需要清除，否则登录成功后不需要密码也能进来。什么都是shiro管理。坑的地方
+                token.clear();  
+                return "/index";
+            }else{  
+                token.clear();  
+                return "redirect:/login";
+            }
         }catch(UnknownAccountException uae){  
             logger.info("对用户[" + username + "]进行登录验证..验证未通过,未知账户");  
             redirectAttributes.addFlashAttribute("message", "未知账户");  
@@ -88,14 +97,7 @@ public class SecurityController {
             ae.printStackTrace();  
             redirectAttributes.addFlashAttribute("message", "用户名或密码不正确");  
         }  
-        //验证是否登录成功  
-        if(currentUser.isAuthenticated()){  
-            logger.info("用户[" + username + "]登录认证通过(这里可以进行一些认证通过后的一些系统参数初始化操作)");  
-            return "/index";
-        }else{  
-            token.clear();  
-            return "redirect:/login";
-        }
+       return null;
     }
     
     

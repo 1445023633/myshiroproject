@@ -13,18 +13,21 @@ Hello, <shiro:principal/>, how are you today?
     
     <!-- 当数据库中的权限和这个一致时就可以进入 -->
     <shiro:hasRole name="admin">
-         <br />I'm fine, 我拥有管理员角色--<span th:text="${username}"></span>
+         <br /> I'm fine, 我拥有管理员角色--
+         <shiro:user>    
+                                    欢迎<shiro:principal property="userName"/>
+         </shiro:user> 
     </shiro:hasRole>
         
  <!--        数据库中对应的Entity的数据，是放入shiro框架中的SimpleAuthenticationInfo中的对象，所以才会有这些 -->
-		<shiro:user>    
+		<!-- <shiro:user>    
 		               欢迎<shiro:principal property="userName"/>
 		         欢迎<shiro:principal property="id"/>
 		     欢迎<shiro:principal property="password"/>   
 		          欢迎<shiro:principal property="roles"/> 
 		               欢迎<shiro:principal property="descriptions"/> 
 		               
-		</shiro:user>   
+		</shiro:user>    -->
 		
 		<form action="/logOut" method="Post">
 		      <input type="submit" value="点我注销"></input>

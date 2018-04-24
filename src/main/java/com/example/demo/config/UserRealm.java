@@ -53,39 +53,39 @@ public class UserRealm extends AuthorizingRealm{
 //		super.setCredentialsMatcher(authCredential);
 //	}
 	
-//	(用于添加认证成功后的角色、权限等信息 ，并没有什么用。
+//	(用于添加认证成功后的角色、权限等信息到shiro框架中的对象中,如果不加进去,index中将不会有角色。。
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principal) {
 		//获取session中的用户
-//		User user=(User) principal.fromRealm(this.getClass().getName()).iterator().next();//获取session中的用户
+		User user=(User) principal.fromRealm(this.getClass().getName()).iterator().next();//获取session中的用户
 		//角色集合
-//		List<String> userRoles = new ArrayList<String>(); 
-//		//权限集合
-//	    List<String> userPermissions = new ArrayList<String>();  
-//	    //从数据库中获取当前登录用户的详细信息  
-////        User user = userRepository.findByUserName(currentLoginName);
-//        if(null != user){  
-//            //获取当前用户下拥有的所有角色列表
-//        	if(user.getUserName().contains(",")) {
-//        		String[]  roles=user.getRoles().split(",");
-//        		userRoles.addAll(Arrays.asList(roles));
-//        	}else {
-//        		userRoles.add(user.getRoles());
-//        	}
-//        	//获取当前所有权限集合
-//        	for(String role:userRoles) {
-//        		//获取角色对应
-//            	userPermissions.add(permessionRepository.findByRole(role).getPermissions());
-//        	}
-//        }else{  
-//            throw new AuthorizationException("找不到该用户名对应的用户");  
-//        }  
-        //为当前用户的角色和权限放入认证管理中
-//        SimpleAuthorizationInfo authorizationInfo=new SimpleAuthorizationInfo();
-//        authorizationInfo.addRoles(userRoles);
-//        authorizationInfo.addStringPermissions(userPermissions);
+		List<String> userRoles = new ArrayList<String>(); 
+		//权限集合
+	    List<String> userPermissions = new ArrayList<String>();  
+	    //从数据库中获取当前登录用户的详细信息  
+//        User user = userRepository.findByUserName(currentLoginName);
+        if(null != user){  
+            //获取当前用户下拥有的所有角色列表
+        	if(user.getUserName().contains(",")) {
+        		String[]  roles=user.getRoles().split(",");
+        		userRoles.addAll(Arrays.asList(roles));
+        	}else {
+        		userRoles.add(user.getRoles());
+        	}
+        	//获取当前所有权限集合
+        	for(String role:userRoles) {
+        		//获取角色对应
+            	userPermissions.add(permessionRepository.findByRole(role).getPermissions());
+        	}
+        }else{  
+            throw new AuthorizationException("找不到该用户名对应的用户");  
+        }  
+//        为当前用户的角色和权限放入认证管理中
+        SimpleAuthorizationInfo authorizationInfo=new SimpleAuthorizationInfo();
+        authorizationInfo.addRoles(userRoles);
+        authorizationInfo.addStringPermissions(userPermissions);
 //		SimpleAuthorizationInfo authorizationInfo=new SimpleAuthorizationInfo();
-		return  null;
+		return  authorizationInfo;
 	}
 	
 	 /** 
