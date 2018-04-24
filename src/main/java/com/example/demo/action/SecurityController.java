@@ -109,13 +109,13 @@ public class SecurityController {
         return "login";
     }
 
-
-    @RequestMapping("/pages/403")
-    public String unauthorizedRole(){
-        logger.info("------没有权限-------");
-        return "403";
-    }
-    
+//
+//    @RequestMapping("/pages/403")
+//    public String unauthorizedRole(){
+//        logger.info("------没有权限-------");
+//        return "403";
+//    }
+//    
     //1.必须将它改成加密模式。使用md5加密,ok
     //2.如何登出。 ok
     //3.如何限制登录失败次数，并设置上锁时间 CredentialsMatcher里面检查，记录登录次数是最简单的做法。

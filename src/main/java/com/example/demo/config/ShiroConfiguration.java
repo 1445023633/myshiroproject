@@ -54,7 +54,7 @@ public class ShiroConfiguration {
         shiroFilterFactoryBean.setSuccessUrl("/index");
        
         //用户访问未对其授权的资源时,所显示的连接
-        shiroFilterFactoryBean.setUnauthorizedUrl("/pages/403");
+//        shiroFilterFactoryBean.setUnauthorizedUrl("/pages/403");   //并没有什么用。。。
         /*定义shiro过滤器,例如实现自定义的FormAuthenticationFilter，需要继承FormAuthenticationFilter
         **本例中暂不自定义实现，在下一节实现验证码的例子中体现
         */
@@ -97,6 +97,7 @@ public class ShiroConfiguration {
     public UserRealm userRealm(@Qualifier("credentialsMatcher") CredentialsMatcher matcher) {
     	UserRealm authRealm=new UserRealm();
         authRealm.setCredentialsMatcher(matcher);
+        authRealm.setCachingEnabled(false);//自己添加的，不一定对，可能需要删除。
         return authRealm;
     }
     
