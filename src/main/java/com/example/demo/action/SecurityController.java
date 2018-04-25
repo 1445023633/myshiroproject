@@ -1,5 +1,7 @@
 package com.example.demo.action;
 
+import java.util.Collection;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -12,6 +14,9 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.apache.shiro.mgt.SessionsSecurityManager;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.session.mgt.DefaultSessionManager;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +65,21 @@ public class SecurityController {
         System.out.println(username);
         //生成shiro中需要验证的对象
         UsernamePasswordToken token = new UsernamePasswordToken(user.getUserName(), user.getPassword());
+        //处理session,防止重复登录
+        SessionsSecurityManager securityManager = (SessionsSecurityManager) SecurityUtils.getSecurityManager();
+        DefaultSessionManager sessionManager = (DefaultSessionManager) securityManager.getSessionManager();
+        Collection<Session> sessions = sessionManager.getSessionDAO().getActiveSessions();//获取当前已登录的用户session列表
+        for (Session session : sessions) {
+            //清除该用户以前登录时保存的session
+//            IotdUserEntity en=(IotdUserEntity)(session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY));
+//            String phone=en.getPhone();
+            //如果和当前session是同一个session，则不剔除
+            if (SecurityUtils.getSubject().getSession().getId().equals(session.getId())) {
+                break;
+            }else {
+                sessionManager.getSessionDAO().delete(session);
+            } 
+        }
         //获取当前的Subject（shiro框架中）  所有的与shiro框架交互的都是通过Subject 
         Subject currentUser = SecurityUtils.getSubject();  
         try {  
@@ -68,12 +88,12 @@ public class SecurityController {
             //所以这一步在调用login(token)方法时,它会走到MyRealm.doGetAuthenticationInfo()方法中,具体验证方式详见此方法  
             logger.info("对用户[" + username + "]进行登录验证..验证开始");  
             //将进入到shiro框架中调用安全管理器进行相应的操作
-            currentUser.login(token);  
+            currentUser.login(token);
             //验证是否登录成功  
             if(currentUser.isAuthenticated()){  
                 logger.info("用户[" + username + "]登录认证通过(这里可以进行一些认证通过后的一些系统参数初始化操作)");  
                 //需要清除，否则登录成功后不需要密码也能进来。什么都是shiro管理。坑的地方
-                token.clear();  
+                token.clear();          
                 return "/index";
             }else{  
                 token.clear();  
