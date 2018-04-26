@@ -76,7 +76,7 @@ public class SecurityController {
             //如果和当前session是同一个session，则不剔除
             if (SecurityUtils.getSubject().getSession().getId().equals(session.getId())) {
                 break;
-            }else {
+            }else if(session.getAttribute(username)!=null){
                 sessionManager.getSessionDAO().delete(session);
             } 
         }
@@ -92,6 +92,7 @@ public class SecurityController {
             //验证是否登录成功  
             if(currentUser.isAuthenticated()){  
                 logger.info("用户[" + username + "]登录认证通过(这里可以进行一些认证通过后的一些系统参数初始化操作)");  
+                SecurityUtils.getSubject().getSession().setAttribute(username,user.getPassword());
                 //需要清除，否则登录成功后不需要密码也能进来。什么都是shiro管理。坑的地方
                 token.clear();          
                 return "/index";
