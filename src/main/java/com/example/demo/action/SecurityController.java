@@ -13,6 +13,7 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.mgt.SessionsSecurityManager;
 import org.apache.shiro.session.Session;
@@ -66,6 +67,7 @@ public class SecurityController {
         System.out.println(username);
         //生成shiro中需要验证的对象
         UsernamePasswordToken token = new UsernamePasswordToken(user.getUserName(), user.getPassword());
+        
         //处理session,防止重复登录
         SessionsSecurityManager securityManager = (SessionsSecurityManager) SecurityUtils.getSecurityManager();
         DefaultSessionManager sessionManager = (DefaultSessionManager) securityManager.getSessionManager();
@@ -76,17 +78,12 @@ public class SecurityController {
 //            String phone=en.getPhone();
             //如果和当前session是同一个session，则不剔除
             if (SecurityUtils.getSubject().getSession().getId().equals(session.getId())) {
-                break;
-            }else if(session.getAttribute(username)!=null){
-                sessionManager.getSessionDAO().delete(session);
-            } 
+            	sessionManager.getSessionDAO().delete(session);
+            }
         }
         //获取当前的Subject（shiro框架中）  所有的与shiro框架交互的都是通过Subject 
         Subject currentUser = SecurityUtils.getSubject();  
         try {  
-            //在调用了login方法后,SecurityManager会收到AuthenticationToken,并将其发送给已配置的Realm执行必须的认证检查  
-            //每个Realm都能在必要时对提交的AuthenticationTokens作出反应  
-            //所以这一步在调用login(token)方法时,它会走到MyRealm.doGetAuthenticationInfo()方法中,具体验证方式详见此方法  
             logger.info("对用户[" + username + "]进行登录验证..验证开始");  
             //将进入到shiro框架中调用安全管理器进行相应的操作
             currentUser.login(token);

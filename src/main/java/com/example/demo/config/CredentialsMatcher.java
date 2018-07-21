@@ -1,6 +1,8 @@
 package com.example.demo.config;
 
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -12,6 +14,8 @@ import org.apache.shiro.authc.credential.SimpleCredentialsMatcher;
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.crypto.hash.SimpleHash;
+import org.hibernate.internal.util.compare.ComparableComparator;
+import org.mockito.internal.matchers.CompareTo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +71,7 @@ public class CredentialsMatcher extends SimpleCredentialsMatcher{
 	     
 //		 利用redis缓存工具
 	     Jedis jedis=new Jedis("localhost",6379);
+	     jedis.set("sdds", "sdr", "NX", "PX", 12321);
 	     int number=0;
 	     if(!flage) {
 	    	 if(jedis.get(userName)==null) {
@@ -91,16 +96,13 @@ public class CredentialsMatcher extends SimpleCredentialsMatcher{
 //	    			throw new Exception("重复5次，锁");
 	    			throw new DisabledAccountException("此帐号已经设置为禁止登录！");
 	    		 }
-	    		 jedis.del(userName);
+//	    		 jedis.del(userName);
 	    	}
 	     }
 	     //进行密码的比对
 //	     return this.equals(sh2.toString(),dbPassword);
 	     return flage;
 	}
-
-	
-
 
 		
 }
